@@ -42,35 +42,51 @@
 <h1>Travel Tour Registration</h1>
 
 <div class="container">
-    <!-- Add Trip Form -->
+    <?php
+    include 'db.php';
+    $update_trip = null;
+
+    // Check if we are updating a trip
+    if (isset($_GET['update'])) {
+        $id = $_GET['update'];
+        $result = mysqli_query($conn, "SELECT * FROM trips WHERE id=$id");
+        if (mysqli_num_rows($result) > 0) {
+            $update_trip = mysqli_fetch_assoc($result);
+        }
+    }
+    ?>
+
+    <!-- Add Trip / Update Trip Form -->
     <form action="code.php" method="POST">
-        <h2>Add Trip</h2>
-        <label>First Name: <input type="text" name="first_name" required></label><br><br>
-        <label>Last Name: <input type="text" name="last_name" required></label><br><br>
-        <label>Date of Birth: <input type="date" name="dob" required></label><br><br>
+        <h2><?php echo isset($update_trip) ? 'Update Trip' : 'Add Trip'; ?></h2>
+        <input type="hidden" name="id" value="<?php echo isset($update_trip) ? $update_trip['id'] : ''; ?>">
+        
+        <label>First Name: <input type="text" name="first_name" value="<?php echo isset($update_trip) ? $update_trip['first_name'] : ''; ?>" required></label><br><br>
+        <label>Last Name: <input type="text" name="last_name" value="<?php echo isset($update_trip) ? $update_trip['last_name'] : ''; ?>" required></label><br><br>
+        <label>Date of Birth: <input type="date" name="dob" value="<?php echo isset($update_trip) ? $update_trip['dob'] : ''; ?>" required></label><br><br>
         <label>Gender:
-            <input type="radio" name="gender" value="Male" required> Male
-            <input type="radio" name="gender" value="Female" required> Female
-            <input type="radio" name="gender" value="Other" required> Other
+            <input type="radio" name="gender" value="Male" <?php if (isset($update_trip) && $update_trip['gender'] == 'Male') echo 'checked'; ?>> Male
+            <input type="radio" name="gender" value="Female" <?php if (isset($update_trip) && $update_trip['gender'] == 'Female') echo 'checked'; ?>> Female
+            <input type="radio" name="gender" value="Other" <?php if (isset($update_trip) && $update_trip['gender'] == 'Other') echo 'checked'; ?>> Other
         </label><br><br>
-        <label>Email: <input type="email" name="email" required></label><br><br>
-        <label>Phone Number: <input type="text" name="phone" required></label><br><br>
+        <label>Email: <input type="email" name="email" value="<?php echo isset($update_trip) ? $update_trip['email'] : ''; ?>" required></label><br><br>
+        <label>Phone Number: <input type="text" name="phone" value="<?php echo isset($update_trip) ? $update_trip['phone'] : ''; ?>" required></label><br><br>
         <label>Tour Destination:
             <select name="destination" required>
-                <option value="Paris">Paris</option>
-                <option value="Rome">Rome</option>
-                <option value="Tokyo">Tokyo</option>
+                <option value="Paris" <?php if (isset($update_trip) && $update_trip['destination'] == 'Paris') echo 'selected'; ?>>Paris</option>
+                <option value="Rome" <?php if (isset($update_trip) && $update_trip['destination'] == 'Rome') echo 'selected'; ?>>Rome</option>
+                <option value="Tokyo" <?php if (isset($update_trip) && $update_trip['destination'] == 'Tokyo') echo 'selected'; ?>>Tokyo</option>
             </select>
         </label><br><br>
         <label>Tour Type:
             <select name="tour_type" required>
-                <option value="Adventure">Adventure</option>
-                <option value="Relaxation">Relaxation</option>
-                <option value="Cultural">Cultural</option>
+                <option value="Adventure" <?php if (isset($update_trip) && $update_trip['tour_type'] == 'Adventure') echo 'selected'; ?>>Adventure</option>
+                <option value="Relaxation" <?php if (isset($update_trip) && $update_trip['tour_type'] == 'Relaxation') echo 'selected'; ?>>Relaxation</option>
+                <option value="Cultural" <?php if (isset($update_trip) && $update_trip['tour_type'] == 'Cultural') echo 'selected'; ?>>Cultural</option>
             </select>
         </label><br><br>
-        <label>Preferred Travel Dates: <input type="date" name="travel_dates" required></label><br><br>
-        <input type="submit" name="add_trip" value="Add Trip">
+        <label>Preferred Travel Dates: <input type="date" name="travel_dates" value="<?php echo isset($update_trip) ? $update_trip['travel_dates'] : ''; ?>" required></label><br><br>
+        <input type="submit" name="<?php echo isset($update_trip) ? 'update_trip' : 'add_trip'; ?>" value="<?php echo isset($update_trip) ? 'Update Trip' : 'Add Trip'; ?>">
     </form>
 
     <!-- View Trip Table -->
@@ -88,7 +104,7 @@
             </thead>
             <tbody>
                 <?php
-                include 'db.php';
+                // Fetch all trips from the database and display them
                 $result = mysqli_query($conn, "SELECT * FROM trips");
                 while($row = mysqli_fetch_assoc($result)) {
                     echo "<tr>
@@ -97,7 +113,7 @@
                         <td>{$row['last_name']}</td>
                         <td>{$row['destination']}</td>
                         <td class='actions'>
-                            <a href='code.php?update={$row['id']}'>Update</a>
+                            <a href='index.php?update={$row['id']}'>Update</a>
                             <a href='code.php?delete={$row['id']}'>Delete</a>
                         </td>
                     </tr>";
